@@ -8,6 +8,8 @@ import { redirect } from 'next/navigation';
 
 export async function getInvoices() {
   const user = await getUser();
+  if (!user) redirect('/login');
+  
   const org = await getUserOrganization(user.id);
   const supabase = await createClient();
 
@@ -26,6 +28,8 @@ export async function getInvoices() {
 
 export async function createInvoice(formData: FormData): Promise<void> {
   const user = await getUser();
+  if (!user) redirect('/login');
+  
   const org = await getUserOrganization(user.id);
   const supabase = await createClient();
 
@@ -34,7 +38,6 @@ export async function createInvoice(formData: FormData): Promise<void> {
   const dueDate = formData.get('due_date') as string;
   const terms = formData.get('terms') as string;
 
-  // Get the latest invoice number
   const { data: latestInvoice } = await supabase
     .from('invoices')
     .select('invoice_number')
@@ -78,10 +81,11 @@ export async function createInvoice(formData: FormData): Promise<void> {
 
 export async function updateInvoiceItems(invoiceId: string, items: any[]): Promise<void> {
   const user = await getUser();
+  if (!user) redirect('/login');
+  
   const org = await getUserOrganization(user.id);
   const supabase = await createClient();
 
-  // Verify invoice belongs to org
   const { data: invoice } = await supabase
     .from('invoices')
     .select('id')
@@ -91,13 +95,11 @@ export async function updateInvoiceItems(invoiceId: string, items: any[]): Promi
 
   if (!invoice) throw new Error('Invoice not found');
 
-  // Delete existing items
   await supabase
     .from('invoice_items')
     .delete()
     .eq('invoice_id', invoiceId);
 
-  // Insert new items and calculate totals
   let subtotal = 0;
   for (const item of items) {
     const amount = parseFloat(item.qty) * parseFloat(item.rate);
@@ -114,10 +116,9 @@ export async function updateInvoiceItems(invoiceId: string, items: any[]): Promi
       });
   }
 
-  const tax = 0; // Can be calculated based on org settings
+  const tax = 0;
   const total = subtotal + tax;
 
-  // Update invoice totals
   await supabase
     .from('invoices')
     .update({
@@ -133,10 +134,11 @@ export async function updateInvoiceItems(invoiceId: string, items: any[]): Promi
 
 export async function generateInvoicePDF(invoiceId: string) {
   const user = await getUser();
+  if (!user) redirect('/login');
+  
   const org = await getUserOrganization(user.id);
   const supabase = await createClient();
 
-  // Create job
   const { data: job, error } = await supabase
     .from('jobs')
     .insert({
@@ -156,6 +158,8 @@ export async function generateInvoicePDF(invoiceId: string) {
 
 export async function deleteInvoice(invoiceId: string): Promise<void> {
   const user = await getUser();
+  if (!user) redirect('/login');
+  
   const org = await getUserOrganization(user.id);
   const supabase = await createClient();
 

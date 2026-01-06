@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      font-size: 9.5pt;
+      line-height: 1.3;
+      color: #333;
+      padding: 25px 35px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 12px;
+    }
+    .header-left {
+      flex: 1;
+    }
+    .logo {
+      width: 180px;
+      height: auto;
+      display: block;
+    }
+    .company-info {
+      transform: translateY(-20px);  /* Pull entire company info section UP */
+    }
+    .company-name {
+      font-weight: bold;
+      font-size: 11pt;
+      margin-bottom: 3px;
+    }
+    .company-details {
+      font-size: 8.5pt;
+      line-height: 1.4;
+    }
+    .invoice-title {
+      text-align: right;
+      font-size: 26pt;
+      font-weight: bold;
+      color: #2563eb;
+      line-height: 1;
+      padding-right: 30px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-weight: bold;
+      font-size: 8pt;
+      color: #666;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .bill-to-section {
+      margin-bottom: 15px;
+    }
+    .client-name {
+      font-weight: bold;
+      font-size: 10pt;
+      margin-bottom: 2px;
+    }
+    .client-details {
+      font-size: 8.5pt;
+      line-height: 1.4;
+    }
+    .invoice-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 3px;
+    }
+    .invoice-meta div {
+      flex: 1;
+    }
+    .meta-label {
+      font-size: 7.5pt;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .meta-value {
+      font-size: 10pt;
+      font-weight: bold;
+      margin-top: 2px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0 12px 0;
+    }
+    th {
+      background: #2563eb;
+      color: white;
+      padding: 8px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 8.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    th:last-child, td:last-child {
+      text-align: right;
+    }
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 9pt;
+    }
+    .totals {
+      margin-top: 12px;
+      text-align: right;
+    }
+    .totals-row {
+      display: flex;
+      justify-content: flex-end;
+      padding: 4px 0;
+      font-size: 9.5pt;
+    }
+    .totals-label {
+      width: 120px;
+      text-align: right;
+      padding-right: 15px;
+      font-weight: 600;
+    }
+    .totals-value {
+      width: 90px;
+      text-align: right;
+    }
+    .total-final {
+      font-size: 14pt;
+      font-weight: bold;
+      color: #2563eb;
+      border-top: 2px solid #2563eb;
+      padding-top: 5px;
+      margin-top: 5px;
+    }
+    .payment-section {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 3px;
+      border-left: 3px solid #2563eb;
+    }
+    .payment-title {
+      font-weight: bold;
+      font-size: 9pt;
+      margin-bottom: 8px;
+      color: #2563eb;
+    }
+    .payment-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      font-size: 8.5pt;
+    }
+    .payment-label {
+      font-weight: 600;
+      color: #666;
+    }
+    .compliance {
+      margin-top: 15px;
+      padding: 10px;
+      background: #fef3c7;
+      border-radius: 3px;
+      font-size: 7.5pt;
+      color: #78350f;
+      line-height: 1.4;
+    }
+    .footer {
+      margin-top: 15px;
+      padding-top: 12px;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+      font-size: 7.5pt;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      {{#if logo_url}}
+      <img src="{{logo_url}}" class="logo" alt="Company Logo">
+      {{/if}}
+      <div class="company-info">
+        <div class="company-name">{{company_name}}</div>
+        <div class="company-details">
+          {{#if address_line1}}<div>{{address_line1}}</div>{{/if}}
+          {{#if address_line2}}<div>{{address_line2}}</div>{{/if}}
+          {{#if email}}<div>{{email}}</div>{{/if}}
+          {{#if phone}}<div>{{phone}}</div>{{/if}}
+        </div>
+      </div>
+    </div>
+    <div class="invoice-title">INVOICE</div>
+  </div>
+
+  <div class="bill-to-section">
+    <div class="section-title">Bill To:</div>
+    <div class="client-name">{{client_name}}</div>
+    <div class="client-details">
+      {{#if client_address_line1}}<div>{{client_address_line1}}</div>{{/if}}
+      {{#if client_address_line2}}<div>{{client_address_line2}}</div>{{/if}}
+    </div>
+  </div>
+
+  <div class="invoice-meta">
+    <div>
+      <div class="meta-label">Invoice Number</div>
+      <div class="meta-value">{{invoice_number}}</div>
+    </div>
+    <div>
+      <div class="meta-label">Issue Date</div>
+      <div class="meta-value">{{issue_date}}</div>
+    </div>
+    <div>
+      <div class="meta-label">Due Date</div>
+      <div class="meta-value">{{due_date}}</div>
+    </div>
+    <div>
+      <div class="meta-label">Terms</div>
+      <div class="meta-value">{{terms}}</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 50%;">Description</th>
+        <th style="width: 15%;">Quantity</th>
+        <th style="width: 15%;">Rate</th>
+        <th style="width: 20%;">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each items}}
+      <tr>
+        <td>{{description}}</td>
+        <td>{{qty}}</td>
+        <td>{{rate}}</td>
+        <td>{{amount}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <div class="totals-row">
+      <div class="totals-label">Subtotal:</div>
+      <div class="totals-value">{{subtotal}}</div>
+    </div>
+    <div class="totals-row">
+      <div class="totals-label">Tax:</div>
+      <div class="totals-value">{{tax}}</div>
+    </div>
+    <div class="totals-row total-final">
+      <div class="totals-label">Total:</div>
+      <div class="totals-value">{{total}}</div>
+    </div>
+  </div>
+
+  {{#if payment_instructions}}
+  <div class="payment-section">
+    <div class="payment-title">Payment Instructions</div>
+    <div class="payment-details">
+      {{#if payment_instructions.payable_to}}
+      <div><span class="payment-label">Payable To:</span> {{payment_instructions.payable_to}}</div>
+      {{/if}}
+      {{#if payment_instructions.bank_name}}
+      <div><span class="payment-label">Bank:</span> {{payment_instructions.bank_name}}</div>
+      {{/if}}
+      {{#if payment_instructions.routing_number}}
+      <div><span class="payment-label">Routing:</span> {{payment_instructions.routing_number}}</div>
+      {{/if}}
+      {{#if payment_instructions.account_number}}
+      <div><span class="payment-label">Account:</span> {{payment_instructions.account_number}}</div>
+      {{/if}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if compliance_text}}
+  <div class="compliance">
+    <strong>Compliance:</strong> {{compliance_text}}
+  </div>
+  {{/if}}
+
+  {{#if footer_note}}
+  <div class="footer">
+    {{footer_note}}
+  </div>
+  {{/if}}
+</body>
+</html>

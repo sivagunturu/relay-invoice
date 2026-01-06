@@ -1,0 +1,155 @@
+{
+  "node": {
+    "000103f9874b7040b8d4cbbc620486096206d2ac25": {
+      "workers": {
+        "app/(dashboard)/templates/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/templates/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/lib/actions/templates.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/src/lib/actions/organizations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "logout",
+          "filename": "src/lib/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/templates/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "src/lib/actions/auth.ts"
+    },
+    "0086a0370c203ea1533a70f33d44e12071457751c5": {
+      "workers": {
+        "app/(dashboard)/templates/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/templates/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/lib/actions/templates.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/src/lib/actions/organizations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getUser",
+          "filename": "src/lib/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/templates/page": "rsc"
+      },
+      "exportedName": "getUser",
+      "filename": "src/lib/actions/auth.ts"
+    },
+    "4074b1ed48e46d3f6aba76d994e833378f65764ade": {
+      "workers": {
+        "app/(dashboard)/templates/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/templates/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/lib/actions/templates.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/src/lib/actions/organizations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "login",
+          "filename": "src/lib/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/templates/page": "rsc"
+      },
+      "exportedName": "login",
+      "filename": "src/lib/actions/auth.ts"
+    },
+    "40b0a4c873012936c9193d892ed73bf486509d8178": {
+      "workers": {
+        "app/(dashboard)/templates/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/templates/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/lib/actions/templates.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/src/lib/actions/organizations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "signUp",
+          "filename": "src/lib/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/templates/page": "rsc"
+      },
+      "exportedName": "signUp",
+      "filename": "src/lib/actions/auth.ts"
+    },
+    "0003f88331bd785b058a2fc4b5cc0199801f55d046": {
+      "workers": {
+        "app/(dashboard)/templates/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/templates/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/lib/actions/templates.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/src/lib/actions/organizations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getTemplates",
+          "filename": "src/lib/actions/templates.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/templates/page": "rsc"
+      },
+      "exportedName": "getTemplates",
+      "filename": "src/lib/actions/templates.ts"
+    },
+    "4000be2a512a3a87d0eec2516f58b18c4920a27677": {
+      "workers": {
+        "app/(dashboard)/templates/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/templates/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/lib/actions/templates.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/src/lib/actions/organizations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteTemplate",
+          "filename": "src/lib/actions/templates.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/templates/page": "rsc"
+      },
+      "exportedName": "deleteTemplate",
+      "filename": "src/lib/actions/templates.ts"
+    },
+    "401b2a7e03125014afe8abdd53fc3b48f9a183337d": {
+      "workers": {
+        "app/(dashboard)/templates/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/templates/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/lib/actions/templates.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/src/lib/actions/organizations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getTemplate",
+          "filename": "src/lib/actions/templates.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/templates/page": "rsc"
+      },
+      "exportedName": "getTemplate",
+      "filename": "src/lib/actions/templates.ts"
+    },
+    "40c9bd2f9d7d9a422796dcad9e40b739877d6c8e1e": {
+      "workers": {
+        "app/(dashboard)/templates/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/templates/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/lib/actions/templates.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/src/lib/actions/organizations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "createTemplate",
+          "filename": "src/lib/actions/templates.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/templates/page": "rsc"
+      },
+      "exportedName": "createTemplate",
+      "filename": "src/lib/actions/templates.ts"
+    },
+    "6084292bbcd6be8272721a3c4157d37ff83f629d8d": {
+      "workers": {
+        "app/(dashboard)/templates/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/templates/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/lib/actions/templates.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/src/lib/actions/organizations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateTemplate",
+          "filename": "src/lib/actions/templates.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/templates/page": "rsc"
+      },
+      "exportedName": "updateTemplate",
+      "filename": "src/lib/actions/templates.ts"
+    },
+    "0075c59babaf1e4bd99e17674d8556a7957a4dad3b": {
+      "workers": {
+        "app/(dashboard)/templates/page": {
+          "moduleId": "[project]/.next-internal/server/app/(dashboard)/templates/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/lib/actions/auth.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/lib/actions/templates.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/src/lib/actions/organizations.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getUserOrganization",
+          "filename": "src/lib/actions/organizations.ts"
+        }
+      },
+      "layer": {
+        "app/(dashboard)/templates/page": "rsc"
+      },
+      "exportedName": "getUserOrganization",
+      "filename": "src/lib/actions/organizations.ts"
+    }
+  },
+  "edge": {}
+}

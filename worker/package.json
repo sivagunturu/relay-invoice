@@ -1,0 +1,21 @@
+{
+  "name": "relay-invoice-worker",
+  "version": "1.0.0",
+  "description": "Background worker for PDF generation",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1",
+    "handlebars": "^4.7.8",
+    "playwright": "^1.40.1",
+    "puppeteer": "^24.34.0"
+  }
+}

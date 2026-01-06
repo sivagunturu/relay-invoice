@@ -1,21 +1,32 @@
-import { signUp } from '@/lib/actions/auth';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import Link from 'next/link';
+
+async function signup(formData: FormData) {
+  'use server';
+  
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+
+  if (!error) {
+    redirect('/dashboard');
+  }
+}
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6">Sign up for RelayInvoice</h1>
-        <form action={signUp}>
-          <Input
-            label="Company Name"
-            type="text"
-            name="companyName"
-            required
-          />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Card className="w-full max-w-md p-6">
+        <h1 className="text-2xl font-bold mb-6">Sign Up for RelayInvoice</h1>
+        <form action={signup} className="space-y-4">
           <Input
             label="Email"
             type="email"
@@ -27,18 +38,11 @@ export default function SignupPage() {
             type="password"
             name="password"
             required
-            minLength={8}
           />
           <Button type="submit" className="w-full">
             Sign Up
           </Button>
         </form>
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Already have an account?{' '}
-          <Link href="/auth/login" className="text-blue-600 hover:underline">
-            Login
-          </Link>
-        </p>
       </Card>
     </div>
   );

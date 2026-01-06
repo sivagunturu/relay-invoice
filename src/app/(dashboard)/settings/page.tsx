@@ -1,143 +1,162 @@
-import { getSettings, updateSettings } from '@/lib/actions/settings';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { LogoUpload } from '@/components/settings/logo-upload';
+import { createClient } from '@/lib/supabase/server';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+async function updateSettings(formData: FormData) {
+  'use server';
+  
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    redirect('/login');
+  }
+
+  const { data: membership } = await supabase
+    .from('org_memberships')
+    .select('org_id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .single();
+
+  if (!membership) {
+    redirect('/login');
+  }
+
+  await supabase
+    .from('org_settings')
+    .upsert({
+      org_id: membership.org_id,
+      company_name: formData.get('company_name') as string,
+      address_line1: formData.get('address_line1') as string,
+      address_line2: formData.get('address_line2') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string,
+      footer_note: formData.get('footer_note') as string,
+    }, {
+      onConflict: 'org_id'
+    });
+
+  revalidatePath('/settings');
+}
 
 export default async function SettingsPage() {
-  const settings = await getSettings();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const { data: membership } = await supabase
+    .from('org_memberships')
+    .select('org_id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .single();
+
+  if (!membership) {
+    redirect('/login');
+  }
+
+  const { data: settings } = await supabase
+    .from('org_settings')
+    .select('*')
+    .eq('org_id', membership.org_id)
+    .single();
 
   return (
-    <div className="max-w-3xl">
-      <h1 className="text-3xl font-bold mb-8">Organization Settings</h1>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">Settings</h1>
 
-      {/* Logo Upload Section */}
-      <Card className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Company Logo</h2>
-        <LogoUpload currentLogoUrl={settings.logo_url} />
-      </Card>
-
-      {/* Company Information */}
-      <Card>
-        <form action={updateSettings}>
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Company Information</h2>
-              <Input 
-                label="Company Name *" 
-                name="companyName" 
-                defaultValue={settings.company_name}
-                required 
-              />
-              <Input 
-                label="Address Line 1" 
-                name="addressLine1" 
-                defaultValue={settings.address_line1 || ''}
-              />
-              <Input 
-                label="Address Line 2" 
-                name="addressLine2" 
-                defaultValue={settings.address_line2 || ''}
-              />
-              <Input 
-                label="Address Line 3" 
-                name="addressLine3" 
-                defaultValue={settings.address_line3 || ''}
-              />
-              <Input 
-                label="Email" 
-                name="email" 
-                type="email"
-                defaultValue={settings.email || ''}
-              />
-              <Input 
-                label="Phone" 
-                name="phone" 
-                defaultValue={settings.phone || ''}
-              />
-            </div>
-
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Invoice Defaults</h2>
-              <Input 
-                label="Default Terms *" 
-                name="defaultTerms" 
-                defaultValue={settings.default_terms}
-                required
-                placeholder="Net 60"
-              />
-              <Input 
-                label="Default Currency *" 
-                name="defaultCurrency" 
-                defaultValue={settings.default_currency}
-                required
-                placeholder="USD"
-              />
-              <Input 
-                label="Invoice Prefix *" 
-                name="invoicePrefix" 
-                defaultValue={settings.invoice_prefix}
-                required
-                placeholder="INV"
-              />
-            </div>
-
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Payment Instructions</h2>
-              <Input 
-                label="Payable To" 
-                name="payable_to" 
-                defaultValue={settings.payment_instructions?.payable_to || ''}
-              />
-              <Input 
-                label="Bank Name" 
-                name="bank_name" 
-                defaultValue={settings.payment_instructions?.bank_name || ''}
-              />
-              <Input 
-                label="Routing Number" 
-                name="routing_number" 
-                defaultValue={settings.payment_instructions?.routing_number || ''}
-              />
-              <Input 
-                label="Account Number" 
-                name="account_number" 
-                defaultValue={settings.payment_instructions?.account_number || ''}
-              />
-            </div>
-
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Compliance & Footer</h2>
-              <div className="mb-4">
+      <div className="bg-white rounded-lg shadow p-6">
+        <form action={updateSettings} className="space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Company Information</h2>
+            
+            <div className="space-y-4">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Compliance Statement
+                  Company Name
                 </label>
-                <textarea
-                  name="complianceText"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  defaultValue={settings.compliance_text || ''}
+                <input
+                  type="text"
+                  name="company_name"
+                  defaultValue={settings?.company_name || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <div className="mb-4">
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address Line 1
+                </label>
+                <input
+                  type="text"
+                  name="address_line1"
+                  defaultValue={settings?.address_line1 || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address Line 2
+                </label>
+                <input
+                  type="text"
+                  name="address_line2"
+                  defaultValue={settings?.address_line2 || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  defaultValue={settings?.email || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  defaultValue={settings?.phone || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Footer Note
                 </label>
                 <textarea
-                  name="footerNote"
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  defaultValue={settings.footer_note || ''}
+                  name="footer_note"
+                  rows={3}
+                  defaultValue={settings?.footer_note || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
           </div>
 
-          <div className="mt-6">
-            <Button type="submit">Save Settings</Button>
-          </div>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Save Changes
+          </button>
         </form>
-      </Card>
+      </div>
     </div>
   );
 }

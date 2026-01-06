@@ -11,6 +11,8 @@ export async function getInvoices() {
   if (!user) redirect('/login');
   
   const org = await getUserOrganization();
+  if (!org) redirect('/login');
+  
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -31,6 +33,8 @@ export async function createInvoice(formData: FormData): Promise<void> {
   if (!user) redirect('/login');
   
   const org = await getUserOrganization();
+  if (!org) redirect('/login');
+  
   const supabase = await createClient();
 
   const clientId = formData.get('client_id') as string;
@@ -84,6 +88,8 @@ export async function updateInvoiceItems(invoiceId: string, items: any[]): Promi
   if (!user) redirect('/login');
   
   const org = await getUserOrganization();
+  if (!org) redirect('/login');
+  
   const supabase = await createClient();
 
   const { data: invoice } = await supabase
@@ -137,6 +143,8 @@ export async function generateInvoicePDF(invoiceId: string) {
   if (!user) redirect('/login');
   
   const org = await getUserOrganization();
+  if (!org) redirect('/login');
+  
   const supabase = await createClient();
 
   const { data: job, error } = await supabase
@@ -161,6 +169,8 @@ export async function deleteInvoice(invoiceId: string): Promise<void> {
   if (!user) redirect('/login');
   
   const org = await getUserOrganization();
+  if (!org) redirect('/login');
+  
   const supabase = await createClient();
 
   const { error } = await supabase

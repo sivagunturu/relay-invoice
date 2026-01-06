@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 async function login(formData: FormData): Promise<void> {
   'use server';
@@ -43,6 +44,12 @@ export default function LoginPage() {
             Login
           </Button>
         </form>
+        <p className="text-center mt-4 text-sm text-gray-600">
+          Don't have an account?{' '}
+          <Link href="/auth/signup" className="text-blue-600 hover:underline">
+            Sign up
+          </Link>
+        </p>
       </Card>
     </div>
   );

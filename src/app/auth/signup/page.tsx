@@ -3,8 +3,9 @@ import { redirect } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
-async function signup(formData: FormData) {
+async function signup(formData: FormData): Promise<void> {
   'use server';
   
   const email = formData.get('email') as string;
@@ -43,6 +44,12 @@ export default function SignupPage() {
             Sign Up
           </Button>
         </form>
+        <p className="text-center mt-4 text-sm text-gray-600">
+          Already have an account?{' '}
+          <Link href="/auth/login" className="text-blue-600 hover:underline">
+            Login
+          </Link>
+        </p>
       </Card>
     </div>
   );

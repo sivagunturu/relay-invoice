@@ -8,10 +8,10 @@ import { redirect } from 'next/navigation';
 
 export async function getConsultants() {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -27,10 +27,10 @@ export async function getConsultants() {
 
 export async function getConsultant(id: string) {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -47,10 +47,10 @@ export async function getConsultant(id: string) {
 
 export async function createConsultant(formData: FormData): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -70,10 +70,10 @@ export async function createConsultant(formData: FormData): Promise<void> {
 
 export async function updateConsultant(id: string, formData: FormData): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -94,10 +94,10 @@ export async function updateConsultant(id: string, formData: FormData): Promise<
 
 export async function deleteConsultant(id: string): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 

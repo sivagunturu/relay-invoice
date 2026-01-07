@@ -12,5 +12,5 @@ export async function getUser() {
 export async function logout(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect('/login');
+  redirect('/auth/login');
 }

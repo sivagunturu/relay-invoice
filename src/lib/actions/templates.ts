@@ -27,10 +27,10 @@ export async function getTemplates() {
 
 export async function createTemplate(formData: FormData): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -50,10 +50,10 @@ export async function createTemplate(formData: FormData): Promise<void> {
 
 export async function updateTemplate(id: string, formData: FormData): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -74,10 +74,10 @@ export async function updateTemplate(id: string, formData: FormData): Promise<vo
 
 export async function deleteTemplate(id: string): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 

@@ -8,10 +8,10 @@ import { redirect } from 'next/navigation';
 
 export async function getInvoices() {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -30,10 +30,10 @@ export async function getInvoices() {
 
 export async function createInvoice(formData: FormData): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -85,10 +85,10 @@ export async function createInvoice(formData: FormData): Promise<void> {
 
 export async function updateInvoiceItems(invoiceId: string, items: any[]): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -140,10 +140,10 @@ export async function updateInvoiceItems(invoiceId: string, items: any[]): Promi
 
 export async function generateInvoicePDF(invoiceId: string) {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -166,10 +166,10 @@ export async function generateInvoicePDF(invoiceId: string) {
 
 export async function deleteInvoice(invoiceId: string): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 

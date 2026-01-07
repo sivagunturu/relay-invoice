@@ -8,10 +8,10 @@ import { redirect } from 'next/navigation';
 
 export async function getClients() {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -27,10 +27,10 @@ export async function getClients() {
 
 export async function getClient(id: string) {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -47,10 +47,10 @@ export async function getClient(id: string) {
 
 export async function addClient(formData: FormData): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -71,10 +71,10 @@ export async function addClient(formData: FormData): Promise<void> {
 
 export async function updateClient(id: string, formData: FormData): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 
@@ -96,10 +96,10 @@ export async function updateClient(id: string, formData: FormData): Promise<void
 
 export async function deleteClient(id: string): Promise<void> {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/login');
   
   const org = await getUserOrganization();
-  if (!org) redirect('/login');
+  if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
 

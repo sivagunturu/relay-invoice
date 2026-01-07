@@ -9,7 +9,7 @@ async function updateSettings(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
-    redirect('/login');
+    redirect('/auth/login');
   }
 
   const { data: membership } = await supabase
@@ -20,7 +20,7 @@ async function updateSettings(formData: FormData) {
     .single();
 
   if (!membership) {
-    redirect('/login');
+    redirect('/auth/login');
   }
 
   await supabase
@@ -45,7 +45,7 @@ export default async function SettingsPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect('/auth/login');
   }
 
   const { data: membership } = await supabase
@@ -56,7 +56,7 @@ export default async function SettingsPage() {
     .single();
 
   if (!membership) {
-    redirect('/login');
+    redirect('/auth/login');
   }
 
   const { data: settings } = await supabase

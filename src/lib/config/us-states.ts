@@ -96,20 +96,32 @@ export function calculateTax(
   let isExempt = false;
   let taxRate = 0;
   
-  if (invoiceType === 'C2C' && state.c2cExempt) {
+  if (invoiceType === 'C2C') {
+    if (state.c2cExempt) {
+      isExempt = true;
+      taxRate = 0;
+    } else if (state.hasServiceTax) {
+      taxRate = state.salesTaxRate;
+    }
+  } else if (invoiceType === 'W2') {
     isExempt = true;
     taxRate = 0;
-  } else if (state.hasServiceTax) {
-    taxRate = state.salesTaxRate;
+  } else if (invoiceType === '1099') {
+    isExempt = true;
+    taxRate = 0;
+  } else {
+    if (state.hasServiceTax) {
+      taxRate = state.salesTaxRate;
+    }
   }
 
-  const taxAmount = isExempt ? 0 : (subtotal * taxRate) / 100;
+  const taxAmount = isExempt ? 0 : Math.round((subtotal * taxRate) / 100 * 100) / 100;
 
   return {
     taxRate,
-    taxAmount: Math.round(taxAmount * 100) / 100,
+    taxAmount,
     isExempt,
-    complianceNote: state.complianceNotes,
+    complianceNote: state.complianceNotes || '',
   };
 }
 
@@ -119,14 +131,14 @@ export function generateComplianceText(
   companyName: string
 ): string {
   const state = getStateByCode(stateCode);
-  
-  if (!state) return '';
+  const stateName = state?.name || stateCode;
+  const complianceNotes = state?.complianceNotes || '';
 
   switch (invoiceType) {
     case 'C2C':
-      return `This invoice is issued on a Corp-to-Corp (C2C) basis. ${companyName} is responsible for all applicable federal and state employer obligations. ${state.complianceNotes}`;
+      return `This invoice is issued on a Corp-to-Corp (C2C) basis. ${companyName || 'The contractor company'} is responsible for all applicable federal and ${stateName} state employer obligations. ${complianceNotes}`;
     case 'W2':
-      return `This invoice reflects W-2 employee services. All applicable federal and state withholding taxes have been calculated. The employer is responsible for payroll tax obligations.`;
+      return `This invoice reflects W-2 employee services. All applicable federal and ${stateName} state withholding taxes have been calculated. The employer is responsible for payroll tax obligations.`;
     case '1099':
       return `This invoice is for independent contractor services (1099). The contractor is responsible for self-employment taxes. No withholding is applied.`;
     default:

@@ -365,7 +365,10 @@ export default async function SettingsPage() {
           </div>
         </div>
 
-        <LogoUpload currentLogoUrl={settings?.logo_url} orgId={membership.org_id} />
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-semibold mb-6 pb-2 border-b">Company Logo</h2>
+          <LogoUpload currentLogoUrl={settings?.logo_url} />
+        </div>
 
         <div className="flex justify-end">
           <button

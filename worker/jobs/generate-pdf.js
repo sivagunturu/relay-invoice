@@ -31,10 +31,11 @@ async function generatePDF(supabase, job) {
   console.log('✓ Type:', invoice.invoice_type || 'C2C');
 
   let logoBase64 = '';
-  if (settings.logo_url) {
+  if (settings?.logo_url) {
     try {
       console.log('→ Fetching logo from:', settings.logo_url);
-      const logoResponse = await fetch(settings.logo_url);
+      const fetchFn = typeof fetch !== 'undefined' ? fetch : (await import('node-fetch')).default;
+      const logoResponse = await fetchFn(settings.logo_url);
       
       if (logoResponse.ok) {
         const logoBuffer = await logoResponse.arrayBuffer();
@@ -48,7 +49,7 @@ async function generatePDF(supabase, job) {
     }
   }
 
-  const client = invoice.clients;
+  const client = invoice.clients || {};
   let clientCityStateZip = '';
   const cityStateZipParts = [];
   if (client.city) cityStateZipParts.push(client.city);
@@ -71,25 +72,41 @@ async function generatePDF(supabase, job) {
     }).format(amount || 0);
   };
 
+  let paymentInstructions = null;
+  if (settings?.payment_instructions) {
+    const pi = typeof settings.payment_instructions === 'string' 
+      ? JSON.parse(settings.payment_instructions) 
+      : settings.payment_instructions;
+    
+    if (pi && (pi.payable_to || pi.bank_name || pi.routing_number || pi.account_number)) {
+      paymentInstructions = {
+        payable_to: pi.payable_to || '',
+        bank_name: pi.bank_name || '',
+        routing_number: pi.routing_number || '',
+        account_number: pi.account_number || '',
+      };
+    }
+  }
+
   const templateData = {
-    logo_url: logoBase64,
-    company_name: settings.company_name || '',
-    address_line1: settings.address_line1 || '',
-    address_line2: settings.address_line2 || '',
-    email: settings.email || '',
-    phone: settings.phone || '',
+    logo_url: logoBase64 || '',
+    company_name: settings?.company_name || '',
+    address_line1: settings?.address_line1 || '',
+    address_line2: settings?.address_line2 || '',
+    email: settings?.email || '',
+    phone: settings?.phone || '',
     client_name: client.name || '',
     client_address_line1: client.address_line1 || '',
     client_address_line2: client.address_line2 || '',
     client_city_state_zip: clientCityStateZip,
-    invoice_number: invoice.invoice_number,
+    invoice_number: invoice.invoice_number || '',
     invoice_type: invoiceTypeLabels[invoice.invoice_type] || invoice.invoice_type || '',
-    issue_date: new Date(invoice.issue_date).toLocaleDateString('en-US', { 
+    issue_date: invoice.issue_date ? new Date(invoice.issue_date).toLocaleDateString('en-US', { 
       year: 'numeric', month: 'short', day: 'numeric' 
-    }),
-    due_date: new Date(invoice.due_date).toLocaleDateString('en-US', { 
+    }) : '',
+    due_date: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US', { 
       year: 'numeric', month: 'short', day: 'numeric' 
-    }),
+    }) : '',
     terms: invoice.terms || 'Net 30',
     items: (invoice.invoice_items || []).map(item => ({
       description: item.description || '',
@@ -101,9 +118,9 @@ async function generatePDF(supabase, job) {
     tax: formatCurrency(invoice.tax),
     tax_rate: invoice.tax_rate || 0,
     total: formatCurrency(invoice.total),
-    payment_instructions: settings.payment_instructions || null,
-    compliance_text: invoice.compliance_text || settings.compliance_text || '',
-    footer_note: (settings.footer_note || '').replace('{invoice_number}', invoice.invoice_number),
+    payment_instructions: paymentInstructions,
+    compliance_text: invoice.compliance_text || settings?.compliance_text || '',
+    footer_note: (settings?.footer_note || '').replace('{invoice_number}', invoice.invoice_number || ''),
   };
 
   const templatePath = path.join(__dirname, '../templates/invoice.html');

@@ -98,14 +98,16 @@ export async function createInvoice(formData: FormData): Promise<void> {
 
   const { data: client } = await supabase
     .from('clients')
-    .select('state')
+    .select('state, terms')
     .eq('id', clientId)
     .single();
 
   const clientState = client?.state || settings?.state || 'TX';
-  const complianceText = generateComplianceText(invoiceType, clientState, settings?.company_name || '');
+  const companyName = settings?.company_name || '';
+  const complianceText = generateComplianceText(invoiceType, clientState, companyName);
+  const taxCalc = calculateTax(0, clientState, invoiceType);
 
-  const invoiceData: any = {
+  const invoiceData: Record<string, any> = {
     org_id: org.id,
     client_id: clientId,
     invoice_number: invoiceNumber,
@@ -114,14 +116,14 @@ export async function createInvoice(formData: FormData): Promise<void> {
     due_date: dueDate.toISOString().split('T')[0],
     terms: terms,
     subtotal: 0,
-    tax_rate: 0,
+    tax_rate: taxCalc.taxRate,
     tax: 0,
     total: 0,
     status: 'draft',
     compliance_text: complianceText,
   };
 
-  if (consultantId) {
+  if (consultantId && consultantId.trim() !== '') {
     invoiceData.consultant_id = consultantId;
   }
 

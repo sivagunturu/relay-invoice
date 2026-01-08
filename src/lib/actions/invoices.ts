@@ -236,8 +236,8 @@ export async function generateInvoicePDF(invoiceId: string) {
     .from('jobs')
     .insert({
       org_id: org.id,
-      type: 'generate_pdf',
-      data: { invoice_id: invoiceId },
+      job_type: 'generate_pdf',
+      metadata: { invoice_id: invoiceId },
       status: 'queued',
     })
     .select()

@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const path = require('path');
 
 async function generatePDF(supabase, job) {
-  const invoiceId = job.data?.invoice_id || job.metadata?.invoice_id;
+  const invoiceId = job.metadata?.invoice_id || job.data?.invoice_id;
   console.log(`📄 Generating PDF for invoice ${invoiceId}...`);
 
   const { data: invoice, error: invoiceError } = await supabase

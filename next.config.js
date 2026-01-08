@@ -15,6 +15,16 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  allowedDevOrigins: [
+    '127.0.0.1',
+    'localhost',
+    ...(process.env.REPLIT_DEV_DOMAIN
+      ? [
+          `https://${process.env.REPLIT_DEV_DOMAIN}`,
+          process.env.REPLIT_DEV_DOMAIN,
+        ]
+      : []),
+  ],
 };
 
 export default nextConfig;

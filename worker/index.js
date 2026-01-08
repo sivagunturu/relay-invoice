@@ -1,19 +1,24 @@
 const { createClient } = require('@supabase/supabase-js');
 const { generatePDF } = require('./jobs/generate-pdf');
-require('dotenv').config();
+require('dotenv').config({ path: '.env.local' });
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Missing environment variables:');
+  console.error('  NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '✓' : '✗');
+  console.error('  SUPABASE_SERVICE_ROLE_KEY:', supabaseKey ? '✓' : '✗');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const JOB_HANDLERS = {
   'generate_pdf': generatePDF,
 };
 
 async function pollAndProcessJobs() {
-  console.log('🔍 Polling for jobs...');
-
   const { data: jobs, error } = await supabase
     .from('jobs')
     .select('*')
@@ -56,7 +61,7 @@ async function processJob(job) {
   try {
     const handler = JOB_HANDLERS[job.type || job.job_type];
     if (!handler) {
-      throw new Error(`No handler for job type: ${job.job_type}`);
+      throw new Error(`No handler for job type: ${job.type || job.job_type}`);
     }
 
     const result = await handler(supabase, job);
@@ -90,8 +95,9 @@ async function processJob(job) {
 }
 
 async function main() {
-  console.log('🚀 Worker started (Puppeteer)');
-  console.log('📡 Connected to:', process.env.SUPABASE_URL);
+  console.log('🚀 PDF Worker started');
+  console.log('📡 Connected to Supabase');
+  console.log('🔍 Polling for jobs every 5 seconds...\n');
 
   while (true) {
     try {

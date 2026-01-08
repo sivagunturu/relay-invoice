@@ -38,7 +38,7 @@ async function pollAndProcessJobs() {
 }
 
 async function processJob(job) {
-  console.log(`\n▶️  Processing job ${job.id} (${job.job_type})`);
+  console.log(`\n▶️  Processing job ${job.id} (${job.type || job.job_type})`);
 
   const { error: runningError } = await supabase
     .from('jobs')
@@ -54,7 +54,7 @@ async function processJob(job) {
   }
 
   try {
-    const handler = JOB_HANDLERS[job.job_type];
+    const handler = JOB_HANDLERS[job.type || job.job_type];
     if (!handler) {
       throw new Error(`No handler for job type: ${job.job_type}`);
     }

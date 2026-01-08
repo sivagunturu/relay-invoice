@@ -3,8 +3,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { getUserOrganization } from './organizations';
 import { getUser } from './auth';
+import { getSettings } from './settings';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { calculateTax, generateComplianceText, PAYMENT_TERMS, type InvoiceType } from '@/lib/config/us-states';
 
 export async function getInvoices() {
   const user = await getUser();
@@ -28,7 +30,7 @@ export async function getInvoices() {
   return data;
 }
 
-export async function createInvoice(formData: FormData): Promise<void> {
+export async function getInvoice(id: string) {
   const user = await getUser();
   if (!user) redirect('/auth/login');
   
@@ -37,10 +39,41 @@ export async function createInvoice(formData: FormData): Promise<void> {
   
   const supabase = await createClient();
 
+  const { data, error } = await supabase
+    .from('invoices')
+    .select(`
+      *,
+      clients (*),
+      invoice_items (*)
+    `)
+    .eq('id', id)
+    .eq('org_id', org.id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function createInvoice(formData: FormData): Promise<void> {
+  const user = await getUser();
+  if (!user) redirect('/auth/login');
+  
+  const org = await getUserOrganization();
+  if (!org) redirect('/auth/login');
+  
+  const supabase = await createClient();
+  const settings = await getSettings();
+
   const clientId = formData.get('client_id') as string;
+  const invoiceType = (formData.get('invoice_type') as InvoiceType) || 'C2C';
   const issueDate = formData.get('issue_date') as string;
-  const dueDate = formData.get('due_date') as string;
-  const terms = formData.get('terms') as string;
+  const terms = formData.get('terms') as string || 'Net 30';
+  const consultantId = formData.get('consultant_id') as string || null;
+
+  const termConfig = PAYMENT_TERMS.find(t => t.value === terms);
+  const dueDays = termConfig?.days || 30;
+  const dueDate = new Date(issueDate);
+  dueDate.setDate(dueDate.getDate() + dueDays);
 
   const { data: latestInvoice } = await supabase
     .from('invoices')
@@ -58,22 +91,43 @@ export async function createInvoice(formData: FormData): Promise<void> {
     }
   }
 
-  const invoiceNumber = `INV-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(nextNumber).padStart(4, '0')}`;
+  const prefix = settings?.invoice_prefix || 'INV';
+  const year = new Date().getFullYear().toString().slice(-2);
+  const month = String(new Date().getMonth() + 1).padStart(2, '0');
+  const invoiceNumber = `${prefix}-${year}${month}-${String(nextNumber).padStart(4, '0')}`;
+
+  const { data: client } = await supabase
+    .from('clients')
+    .select('state')
+    .eq('id', clientId)
+    .single();
+
+  const clientState = client?.state || settings?.state || 'TX';
+  const complianceText = generateComplianceText(invoiceType, clientState, settings?.company_name || '');
+
+  const invoiceData: any = {
+    org_id: org.id,
+    client_id: clientId,
+    invoice_number: invoiceNumber,
+    invoice_type: invoiceType,
+    issue_date: issueDate,
+    due_date: dueDate.toISOString().split('T')[0],
+    terms: terms,
+    subtotal: 0,
+    tax_rate: 0,
+    tax: 0,
+    total: 0,
+    status: 'draft',
+    compliance_text: complianceText,
+  };
+
+  if (consultantId) {
+    invoiceData.consultant_id = consultantId;
+  }
 
   const { data: invoice, error } = await supabase
     .from('invoices')
-    .insert({
-      org_id: org.id,
-      client_id: clientId,
-      invoice_number: invoiceNumber,
-      issue_date: issueDate,
-      due_date: dueDate,
-      terms: terms,
-      subtotal: 0,
-      tax: 0,
-      total: 0,
-      status: 'draft',
-    })
+    .insert(invoiceData)
     .select()
     .single();
 
@@ -91,10 +145,11 @@ export async function updateInvoiceItems(invoiceId: string, items: any[]): Promi
   if (!org) redirect('/auth/login');
   
   const supabase = await createClient();
+  const settings = await getSettings();
 
   const { data: invoice } = await supabase
     .from('invoices')
-    .select('id')
+    .select('id, invoice_type, clients(state)')
     .eq('id', invoiceId)
     .eq('org_id', org.id)
     .single();
@@ -108,7 +163,9 @@ export async function updateInvoiceItems(invoiceId: string, items: any[]): Promi
 
   let subtotal = 0;
   for (const item of items) {
-    const amount = parseFloat(item.qty) * parseFloat(item.rate);
+    const qty = parseFloat(item.qty) || 0;
+    const rate = parseFloat(item.rate) || 0;
+    const amount = qty * rate;
     subtotal += amount;
 
     await supabase
@@ -116,19 +173,24 @@ export async function updateInvoiceItems(invoiceId: string, items: any[]): Promi
       .insert({
         invoice_id: invoiceId,
         description: item.description,
-        qty: parseFloat(item.qty),
-        rate: parseFloat(item.rate),
+        qty: qty,
+        rate: rate,
         amount: amount,
       });
   }
 
-  const tax = 0;
+  const clientState = (invoice as any).clients?.state || settings?.state || 'TX';
+  const invoiceType = invoice.invoice_type || 'C2C';
+  const taxCalc = calculateTax(subtotal, clientState, invoiceType as InvoiceType);
+  
+  const tax = taxCalc.taxAmount;
   const total = subtotal + tax;
 
   await supabase
     .from('invoices')
     .update({
       subtotal,
+      tax_rate: taxCalc.taxRate,
       tax,
       total,
       status: 'draft',
@@ -136,6 +198,27 @@ export async function updateInvoiceItems(invoiceId: string, items: any[]): Promi
     .eq('id', invoiceId);
 
   revalidatePath(`/invoices/${invoiceId}`);
+}
+
+export async function updateInvoiceStatus(invoiceId: string, status: string): Promise<void> {
+  const user = await getUser();
+  if (!user) redirect('/auth/login');
+  
+  const org = await getUserOrganization();
+  if (!org) redirect('/auth/login');
+  
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('invoices')
+    .update({ status })
+    .eq('id', invoiceId)
+    .eq('org_id', org.id);
+
+  if (error) throw error;
+
+  revalidatePath(`/invoices/${invoiceId}`);
+  revalidatePath('/invoices');
 }
 
 export async function generateInvoicePDF(invoiceId: string) {

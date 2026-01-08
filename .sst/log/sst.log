@@ -1,0 +1,21 @@
+time=2026-01-08T18:12:59.510Z level=INFO msg="checking for pulumi" path=/home/runner/workspace/.config/sst/bin/pulumi
+time=2026-01-08T18:12:59.510Z level=INFO msg="pulumi install"
+time=2026-01-08T18:12:59.510Z level=INFO msg="pulumi downloading" url=https://github.com/pulumi/pulumi/releases/download/v3.146.0/pulumi-v3.146.0-linux-x64.tar.gz
+time=2026-01-08T18:13:05.033Z level=INFO msg="checking for bun" path=/home/runner/workspace/.config/sst/bin/bun
+time=2026-01-08T18:13:05.033Z level=INFO msg="bun install"
+time=2026-01-08T18:13:05.065Z level=INFO msg="bun selected" filename=bun-linux-x64-baseline.zip
+time=2026-01-08T18:13:05.065Z level=INFO msg="bun downloading" url=https://github.com/oven-sh/bun/releases/download/bun-v1.2.1/bun-linux-x64-baseline.zip
+time=2026-01-08T18:13:06.642Z level=INFO msg="initializing project" version=3.17.25
+time=2026-01-08T18:13:06.643Z level=INFO msg="esbuild building" out=/home/runner/workspace/.sst/platform/sst.config.1767895986643.mjs
+time=2026-01-08T18:13:06.656Z level=INFO msg="esbuild built" outfile=/home/runner/workspace/.sst/platform/sst.config.1767895986643.mjs
+time=2026-01-08T18:13:06.657Z level=INFO msg="evaluating config"
+time=2026-01-08T18:13:06.785Z level=INFO msg="config evaluated"
+time=2026-01-08T18:13:06.787Z level=INFO msg="checking platform"
+time=2026-01-08T18:13:06.787Z level=ERROR msg="open /home/runner/workspace/.sst/platform/version: no such file or directory"
+time=2026-01-08T18:13:06.787Z level=INFO msg="installing platform"
+time=2026-01-08T18:13:06.946Z level=INFO msg="installing deps"
+time=2026-01-08T18:13:06.947Z level=INFO msg="getting package" name=@sst-provider/aws version=latest
+time=2026-01-08T18:13:07.138Z level=INFO msg="getting package" name=@pulumi/aws version=latest
+time=2026-01-08T18:13:07.438Z level=INFO msg="writing package.json"
+time=2026-01-08T18:13:07.439Z level=INFO msg="adding dependency" name=aws
+time=2026-01-08T18:13:07.439Z level=INFO msg="fetching deps"

@@ -11,7 +11,7 @@ export async function getUserOrganization() {
   const supabase = await createClient();
 
   const { data: membership } = await supabase
-    .from('org_memberships')
+    .from('org_members')
     .select('org_id, organizations(*)')
     .eq('user_id', user.id)
     .eq('status', 'active')

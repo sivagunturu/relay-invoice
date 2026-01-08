@@ -15,7 +15,7 @@ async function updateSettings(formData: FormData) {
   }
 
   const { data: membership } = await supabase
-    .from('org_memberships')
+    .from('org_members')
     .select('org_id')
     .eq('user_id', user.id)
     .eq('status', 'active')
@@ -67,7 +67,7 @@ export default async function SettingsPage() {
   }
 
   const { data: membership } = await supabase
-    .from('org_memberships')
+    .from('org_members')
     .select('org_id')
     .eq('user_id', user.id)
     .eq('status', 'active')

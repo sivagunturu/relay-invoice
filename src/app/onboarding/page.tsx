@@ -32,7 +32,7 @@ export default function OnboardingPage() {
       .single();
 
     // Create membership
-    await supabase.from('org_memberships').insert({
+    await supabase.from('org_members').insert({
       org_id: org.id,
       user_id: user.id,
       role: 'owner',

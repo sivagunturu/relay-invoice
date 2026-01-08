@@ -16,6 +16,7 @@ const CLIENT_ID = process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID!;
 
 export interface AuthUser {
   id: string;
+  sub: string;
   email: string;
   emailVerified: boolean;
 }
@@ -121,8 +122,11 @@ export async function getCurrentUser(accessToken: string): Promise<AuthUser | nu
     const email = response.UserAttributes?.find((a) => a.Name === "email")?.Value;
     const emailVerified = response.UserAttributes?.find((a) => a.Name === "email_verified")?.Value === "true";
 
+    const sub = response.UserAttributes?.find((a) => a.Name === "sub")?.Value || response.Username!;
+    
     return {
       id: response.Username!,
+      sub,
       email: email!,
       emailVerified,
     };

@@ -83,6 +83,39 @@ export async function deleteFile(
   );
 }
 
+export async function uploadFile(
+  bucket: "invoices" | "logos",
+  key: string,
+  body: Buffer,
+  contentType: string
+): Promise<void> {
+  const bucketName = bucket === "invoices" ? INVOICE_BUCKET : LOGOS_BUCKET;
+  
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    })
+  );
+}
+
+export async function getSignedDownloadUrl(
+  bucket: "invoices" | "logos",
+  key: string,
+  expiresIn: number = 3600
+): Promise<string> {
+  const bucketName = bucket === "invoices" ? INVOICE_BUCKET : LOGOS_BUCKET;
+  
+  const command = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+  });
+
+  return getSignedUrl(client, command, { expiresIn });
+}
+
 function getExtension(contentType: string): string {
   const map: Record<string, string> = {
     "image/jpeg": ".jpg",

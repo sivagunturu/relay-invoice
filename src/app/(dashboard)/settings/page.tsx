@@ -1,87 +1,42 @@
-import { createClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { US_STATES, PAYMENT_TERMS, INVOICE_TYPES } from '@/lib/config/us-states';
 import { LogoUpload } from '@/components/settings/logo-upload';
+import { getSettings, updateSettings as updateSettingsAction } from '@/lib/actions/settings';
+import { getUser } from '@/lib/actions/auth';
+import { getUserOrganization } from '@/lib/actions/organizations';
 
 async function updateSettings(formData: FormData) {
   'use server';
-  
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
+
+  const user = await getUser();
   if (!user) {
     redirect('/auth/login');
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single();
-
-  if (!membership) {
+  const org = await getUserOrganization();
+  if (!org) {
     redirect('/auth/login');
   }
 
-  const paymentInstructions = {
-    payable_to: formData.get('payable_to') as string || '',
-    bank_name: formData.get('bank_name') as string || '',
-    routing_number: formData.get('routing_number') as string || '',
-    account_number: formData.get('account_number') as string || '',
-  };
-
-  await supabase
-    .from('org_settings')
-    .upsert({
-      org_id: membership.org_id,
-      company_name: formData.get('company_name') as string,
-      address_line1: formData.get('address_line1') as string,
-      address_line2: formData.get('address_line2') as string,
-      city: formData.get('city') as string,
-      state: formData.get('state') as string,
-      zip_code: formData.get('zip_code') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
-      tax_id: formData.get('tax_id') as string,
-      invoice_prefix: formData.get('invoice_prefix') as string,
-      default_terms: formData.get('default_terms') as string,
-      default_invoice_type: formData.get('default_invoice_type') as string,
-      footer_note: formData.get('footer_note') as string,
-      compliance_text: formData.get('compliance_text') as string,
-      payment_instructions: paymentInstructions,
-    }, {
-      onConflict: 'org_id'
-    });
-
-  revalidatePath('/settings');
+  await updateSettingsAction(formData);
 }
 
 export default async function SettingsPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
+  const user = await getUser();
   if (!user) {
     redirect('/auth/login');
   }
 
-  const { data: membership } = await supabase
-    .from('org_members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single();
-
-  if (!membership) {
+  const org = await getUserOrganization();
+  if (!org) {
     redirect('/auth/login');
   }
 
-  const { data: settings } = await supabase
-    .from('org_settings')
-    .select('*')
-    .eq('org_id', membership.org_id)
-    .single();
+  const settings = await getSettings();
+
+  const paymentInstructions = typeof settings?.payment_instructions === 'string'
+    ? JSON.parse(settings.payment_instructions)
+    : settings?.payment_instructions || {};
 
   return (
     <div className="max-w-4xl">
@@ -99,7 +54,7 @@ export default async function SettingsPage() {
                 </label>
                 <input
                   type="text"
-                  name="company_name"
+                  name="companyName"
                   required
                   defaultValue={settings?.company_name || ''}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -129,19 +84,6 @@ export default async function SettingsPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tax ID / EIN
-                </label>
-                <input
-                  type="text"
-                  name="tax_id"
-                  placeholder="XX-XXXXXXX"
-                  defaultValue={settings?.tax_id || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
             </div>
           </div>
         </div>
@@ -156,7 +98,7 @@ export default async function SettingsPage() {
               </label>
               <input
                 type="text"
-                name="address_line1"
+                name="addressLine1"
                 defaultValue={settings?.address_line1 || ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -168,54 +110,22 @@ export default async function SettingsPage() {
               </label>
               <input
                 type="text"
-                name="address_line2"
+                name="addressLine2"
                 defaultValue={settings?.address_line2 || ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  defaultValue={settings?.city || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  State
-                </label>
-                <select
-                  name="state"
-                  defaultValue={settings?.state || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select State</option>
-                  {US_STATES.map((state) => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  ZIP Code
-                </label>
-                <input
-                  type="text"
-                  name="zip_code"
-                  defaultValue={settings?.zip_code || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Address Line 3
+              </label>
+              <input
+                type="text"
+                name="addressLine3"
+                defaultValue={settings?.address_line3 || ''}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
           </div>
         </div>
@@ -231,7 +141,7 @@ export default async function SettingsPage() {
                 </label>
                 <input
                   type="text"
-                  name="invoice_prefix"
+                  name="invoicePrefix"
                   placeholder="INV"
                   defaultValue={settings?.invoice_prefix || 'INV'}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -243,7 +153,7 @@ export default async function SettingsPage() {
                   Default Payment Terms
                 </label>
                 <select
-                  name="default_terms"
+                  name="defaultTerms"
                   defaultValue={settings?.default_terms || 'Net 30'}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -257,18 +167,17 @@ export default async function SettingsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Default Invoice Type
+                  Default Currency
                 </label>
                 <select
-                  name="default_invoice_type"
-                  defaultValue={settings?.default_invoice_type || 'C2C'}
+                  name="defaultCurrency"
+                  defaultValue={settings?.default_currency || 'USD'}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {INVOICE_TYPES.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
+                  <option value="USD">USD - US Dollar</option>
+                  <option value="EUR">EUR - Euro</option>
+                  <option value="GBP">GBP - British Pound</option>
+                  <option value="CAD">CAD - Canadian Dollar</option>
                 </select>
               </div>
             </div>
@@ -287,7 +196,7 @@ export default async function SettingsPage() {
               <input
                 type="text"
                 name="payable_to"
-                defaultValue={settings?.payment_instructions?.payable_to || ''}
+                defaultValue={paymentInstructions?.payable_to || ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -299,7 +208,7 @@ export default async function SettingsPage() {
               <input
                 type="text"
                 name="bank_name"
-                defaultValue={settings?.payment_instructions?.bank_name || ''}
+                defaultValue={paymentInstructions?.bank_name || ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -311,7 +220,7 @@ export default async function SettingsPage() {
               <input
                 type="text"
                 name="routing_number"
-                defaultValue={settings?.payment_instructions?.routing_number || ''}
+                defaultValue={paymentInstructions?.routing_number || ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -323,7 +232,7 @@ export default async function SettingsPage() {
               <input
                 type="text"
                 name="account_number"
-                defaultValue={settings?.payment_instructions?.account_number || ''}
+                defaultValue={paymentInstructions?.account_number || ''}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -339,7 +248,7 @@ export default async function SettingsPage() {
                 Footer Note
               </label>
               <textarea
-                name="footer_note"
+                name="footerNote"
                 rows={2}
                 placeholder="e.g., Remit payment with Invoice # [number]. Thank you for your business!"
                 defaultValue={settings?.footer_note || ''}
@@ -352,7 +261,7 @@ export default async function SettingsPage() {
                 Custom Compliance Text
               </label>
               <textarea
-                name="compliance_text"
+                name="complianceText"
                 rows={3}
                 placeholder="Leave blank to use auto-generated compliance text based on invoice type and state"
                 defaultValue={settings?.compliance_text || ''}

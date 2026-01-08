@@ -1,9 +1,10 @@
-import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download, Edit, FileText } from 'lucide-react';
 import { GeneratePDFButton } from '@/components/invoices/generate-pdf-button';
+import { ViewPDFButton } from '@/components/invoices/view-pdf-button';
 import { Button } from '@/components/ui/button';
+import { getInvoice } from '@/lib/actions/invoices';
 
 const statusColors: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-800',
@@ -25,29 +26,13 @@ export default async function InvoiceDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const invoice = await getInvoice(id);
 
-  const { data: invoice, error } = await supabase
-    .from('invoices')
-    .select(`
-      *,
-      clients (*),
-      invoice_items (*)
-    `)
-    .eq('id', id)
-    .single();
-
-  if (error || !invoice) {
+  if (!invoice) {
     notFound();
   }
 
-  let pdfUrl = null;
-  if (invoice.status === 'ready' || invoice.status === 'sent' || invoice.status === 'paid') {
-    const { data } = supabase.storage
-      .from('invoices')
-      .getPublicUrl(`${invoice.org_id}/${invoice.invoice_number}.pdf`);
-    pdfUrl = data.publicUrl;
-  }
+  const hasPdf = invoice.status === 'ready' || invoice.status === 'sent' || invoice.status === 'paid';
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -83,15 +68,8 @@ export default async function InvoiceDetailPage({
               Edit Items
             </Button>
           </Link>
-          {pdfUrl && (
-            <a
-              href={pdfUrl}
-              download={`${invoice.invoice_number}.pdf`}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              Download PDF
-            </a>
+          {hasPdf && (
+            <ViewPDFButton invoiceNumber={invoice.invoice_number} orgId={invoice.org_id} />
           )}
           <GeneratePDFButton invoiceId={invoice.id} />
         </div>
@@ -125,16 +103,16 @@ export default async function InvoiceDetailPage({
         <div className="grid grid-cols-2 gap-6 mb-6 p-4 bg-gray-50 rounded-lg">
           <div>
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Bill To</h3>
-            <p className="font-semibold text-gray-900">{invoice.clients.name}</p>
-            {invoice.clients.address_line1 && (
+            <p className="font-semibold text-gray-900">{invoice.clients?.name}</p>
+            {invoice.clients?.address_line1 && (
               <p className="text-sm text-gray-600">{invoice.clients.address_line1}</p>
             )}
-            {invoice.clients.address_line2 && (
+            {invoice.clients?.address_line2 && (
               <p className="text-sm text-gray-600">{invoice.clients.address_line2}</p>
             )}
-            {(invoice.clients.city || invoice.clients.state || invoice.clients.zip_code) && (
+            {(invoice.clients?.city || invoice.clients?.state || invoice.clients?.zip_code) && (
               <p className="text-sm text-gray-600">
-                {[invoice.clients.city, invoice.clients.state, invoice.clients.zip_code].filter(Boolean).join(', ')}
+                {[invoice.clients?.city, invoice.clients?.state, invoice.clients?.zip_code].filter(Boolean).join(', ')}
               </p>
             )}
           </div>

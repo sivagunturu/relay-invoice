@@ -22,3 +22,15 @@ export async function queuePdfGeneration(job: PdfJob): Promise<string> {
   const response = await client.send(command);
   return response.MessageId!;
 }
+
+export async function sendMessage(queueUrl: string, message: any): Promise<string> {
+  const command = new SendMessageCommand({
+    QueueUrl: queueUrl,
+    MessageBody: JSON.stringify(message),
+    MessageGroupId: message.orgId || 'default',
+    MessageDeduplicationId: `${message.jobId || message.invoiceId || Date.now()}-${Date.now()}`,
+  });
+
+  const response = await client.send(command);
+  return response.MessageId!;
+}

@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { query, queryOne, execute } from '@/lib/aws/database';
 import { getUserOrganization } from './organizations';
 import { getUser } from './auth';
 import { revalidatePath } from 'next/cache';
@@ -9,60 +9,52 @@ import { redirect } from 'next/navigation';
 export async function getConsultants() {
   const user = await getUser();
   if (!user) redirect('/auth/login');
-  
+
   const org = await getUserOrganization();
   if (!org) redirect('/auth/login');
-  
-  const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('consultants')
-    .select('*')
-    .eq('org_id', org.id)
-    .order('name');
+  const consultants = await query(
+    `SELECT * FROM consultants WHERE org_id = :orgId ORDER BY name`,
+    { orgId: org.id }
+  );
 
-  if (error) throw error;
-  return data || [];
+  return consultants || [];
 }
 
 export async function getConsultant(id: string) {
   const user = await getUser();
   if (!user) redirect('/auth/login');
-  
+
   const org = await getUserOrganization();
   if (!org) redirect('/auth/login');
-  
-  const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('consultants')
-    .select('*')
-    .eq('id', id)
-    .eq('org_id', org.id)
-    .single();
+  const consultant = await queryOne(
+    `SELECT * FROM consultants WHERE id = :id AND org_id = :orgId`,
+    { id, orgId: org.id }
+  );
 
-  if (error) throw error;
-  return data;
+  return consultant;
 }
 
 export async function createConsultant(formData: FormData): Promise<void> {
   const user = await getUser();
   if (!user) redirect('/auth/login');
-  
+
   const org = await getUserOrganization();
   if (!org) redirect('/auth/login');
-  
-  const supabase = await createClient();
 
-  const { error } = await supabase
-    .from('consultants')
-    .insert({
-      org_id: org.id,
+  const id = crypto.randomUUID();
+
+  await execute(
+    `INSERT INTO consultants (id, org_id, name, email, created_at)
+     VALUES (:id, :orgId, :name, :email, NOW())`,
+    {
+      id,
+      orgId: org.id,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-    });
-
-  if (error) throw error;
+    }
+  );
 
   revalidatePath('/consultants');
   redirect('/consultants');
@@ -71,22 +63,20 @@ export async function createConsultant(formData: FormData): Promise<void> {
 export async function updateConsultant(id: string, formData: FormData): Promise<void> {
   const user = await getUser();
   if (!user) redirect('/auth/login');
-  
+
   const org = await getUserOrganization();
   if (!org) redirect('/auth/login');
-  
-  const supabase = await createClient();
 
-  const { error } = await supabase
-    .from('consultants')
-    .update({
+  await execute(
+    `UPDATE consultants SET name = :name, email = :email, updated_at = NOW()
+     WHERE id = :id AND org_id = :orgId`,
+    {
+      id,
+      orgId: org.id,
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-    })
-    .eq('id', id)
-    .eq('org_id', org.id);
-
-  if (error) throw error;
+    }
+  );
 
   revalidatePath('/consultants');
   redirect('/consultants');
@@ -95,19 +85,14 @@ export async function updateConsultant(id: string, formData: FormData): Promise<
 export async function deleteConsultant(id: string): Promise<void> {
   const user = await getUser();
   if (!user) redirect('/auth/login');
-  
+
   const org = await getUserOrganization();
   if (!org) redirect('/auth/login');
-  
-  const supabase = await createClient();
 
-  const { error } = await supabase
-    .from('consultants')
-    .delete()
-    .eq('id', id)
-    .eq('org_id', org.id);
-
-  if (error) throw error;
+  await execute(
+    `DELETE FROM consultants WHERE id = :id AND org_id = :orgId`,
+    { id, orgId: org.id }
+  );
 
   revalidatePath('/consultants');
   redirect('/consultants');

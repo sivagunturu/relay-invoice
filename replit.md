@@ -1,13 +1,36 @@
 # RelayInvoice
 
 ## Overview
-RelayInvoice is a professional, multi-tenant invoicing system built with Next.js 16 and Supabase. It supports multiple invoice types (C2C, W2, 1099), implements state-based tax compliance for all 50 US states, and generates professional PDF invoices.
+RelayInvoice is a professional, multi-tenant invoicing system being migrated to a fully AWS-native serverless architecture. It supports multiple invoice types (C2C, W2, 1099), implements state-based tax compliance for all 50 US states, and generates professional PDF invoices.
+
+## AWS Architecture (Target)
+```
+Users → AWS Amplify (Next.js) → CloudFront CDN
+                ↓
+    ┌───────────┼───────────┐
+    ↓           ↓           ↓
+ Cognito    Aurora      S3 Buckets
+  (Auth)   Serverless   (PDFs/Logos)
+              v2
+                ↓
+           SQS Queue
+                ↓
+         Lambda (PDF)
+```
+
+## AWS Services
+- **Frontend/API**: AWS Amplify with Next.js App Router
+- **Authentication**: Amazon Cognito User Pools
+- **Database**: Aurora Serverless v2 PostgreSQL with Data API
+- **File Storage**: Amazon S3 (private, with presigned URLs)
+- **PDF Generation**: AWS Lambda with Puppeteer/Chromium
+- **Job Queue**: Amazon SQS
 
 ## Project Architecture
 - **Framework**: Next.js 16.1.1 with Turbopack
 - **UI**: React 19 with Tailwind CSS
-- **Database/Auth**: Supabase (external service)
-- **PDF Generation**: Puppeteer with Handlebars templates
+- **Infrastructure as Code**: SST (Serverless Stack)
+- **PDF Generation**: Lambda with @sparticuz/chromium
 - **Icons**: Lucide React
 
 ## Directory Structure
@@ -23,17 +46,20 @@ src/
     auth/            # Authentication pages
     onboarding/      # User onboarding
   components/        # Reusable React components
-    ui/              # Base UI components (Button, Card, Input)
+    ui/              # Base UI components
     invoices/        # Invoice-specific components
     settings/        # Settings-specific components
   lib/               # Utilities and server actions
     actions/         # Server actions for CRUD operations
+    aws/             # AWS SDK utilities (auth, database, storage, queue)
     config/          # Configuration files (us-states.ts)
-    supabase/        # Supabase client configuration
     types/           # TypeScript type definitions
-worker/              # Background worker (PDF generation)
-  jobs/              # Job handlers
-  templates/         # HTML templates for PDFs
+functions/           # AWS Lambda functions
+  pdf-generator.ts   # PDF generation Lambda
+infra/               # Infrastructure files
+  schema.sql         # Database schema
+  seed-tax-rules.sql # Tax rules for all 50 states
+sst.config.ts        # SST infrastructure configuration
 ```
 
 ## Key Features
@@ -44,32 +70,56 @@ worker/              # Background worker (PDF generation)
 - **Payment Instructions**: Bank details displayed on invoices
 - **Client Management**: State-based address with tax ID tracking
 
-## Environment Variables
-The app requires the following environment variables (configured in .env.local):
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
-- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key
+## Environment Variables (AWS)
+- `AWS_ACCESS_KEY_ID` - AWS access key
+- `AWS_SECRET_ACCESS_KEY` - AWS secret key
+- `AWS_REGION` - AWS region (e.g., us-east-1)
+- `NEXT_PUBLIC_USER_POOL_ID` - Cognito User Pool ID
+- `NEXT_PUBLIC_USER_POOL_CLIENT_ID` - Cognito App Client ID
+- `DATABASE_ARN` - Aurora cluster ARN
+- `DATABASE_SECRET_ARN` - Secrets Manager ARN for DB credentials
+- `INVOICE_BUCKET_NAME` - S3 bucket for PDFs
+- `LOGOS_BUCKET_NAME` - S3 bucket for logos
+- `PDF_QUEUE_URL` - SQS queue URL for PDF jobs
 
 ## Development
-Run the development server:
+Run the development server (current Supabase version):
 ```bash
 npm run dev -- -H 0.0.0.0 -p 5000
 ```
 
-Run the PDF worker (optional, for PDF generation):
+Deploy to AWS with SST:
 ```bash
-node worker/index.js
+npx sst dev      # Development
+npx sst deploy   # Production
 ```
+
+## Deployment
+The app uses SST for deployment:
+1. `npx sst dev` - Starts local development with live AWS resources
+2. `npx sst deploy --stage production` - Deploys to production
 
 ## Configuration Notes
 - `postcss.config.cjs` and `tailwind.config.cjs` use CommonJS syntax
 - `next.config.js` is configured with `allowedDevOrigins` for Replit proxy support
 - Package type is set to "module" in package.json
+- SST v3 (Ion) is used for AWS infrastructure management
 
 ## Recent Changes (January 2026)
-- Added US state tax configuration with compliance rules
-- Implemented C2C/W2/1099 invoice type selection
-- Enhanced client form with state, city, zip, and tax ID fields
-- Redesigned professional PDF template with modern styling
-- Added payment instructions to settings and PDF output
-- Updated invoice creation with consultant selection and auto-generated compliance text
+- Migrating from Supabase to fully AWS-native architecture
+- Added SST configuration for AWS deployment
+- Created AWS Lambda function for PDF generation
+- Set up Aurora Serverless v2 database schema
+- Created AWS SDK utilities for auth, database, storage, and queue
+- Tax rules for all 50 US states seeded in database
+
+## Migration Status
+- [x] SST project setup
+- [x] AWS utility files (auth, database, storage, queue)
+- [x] Lambda PDF generator
+- [x] Database schema design
+- [x] Tax rules seed data
+- [ ] Cognito authentication integration
+- [ ] Replace Supabase client with AWS SDK calls
+- [ ] SQS integration for PDF jobs
+- [ ] Deploy and test on AWS
